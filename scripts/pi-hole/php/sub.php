@@ -25,27 +25,26 @@ require("database.php");
 $GRAVITYDB = getGravityDBFilename();
 $db = SQLite3_connect($GRAVITYDB, SQLITE3_OPEN_READWRITE);
 
-switch($type) {
-	case "white":
-		echo remove_from_table($db, "domainlist", $domains, false, ListType::whitelist);
-		break;
+switch ($type) {
+    case "white":
+        echo remove_from_table($db, "domainlist", $domains, false, ListType::whitelist);
+        break;
 
-	case "black":
-		echo remove_from_table($db, "domainlist", $domains, false, ListType::blacklist);
-		break;
+    case "black":
+        echo remove_from_table($db, "domainlist", $domains, false, ListType::blacklist);
+        break;
 
-	case "white_regex":
-		echo remove_from_table($db, "domainlist", $domains, false, ListType::regex_whitelist);
-		break;
+    case "white_regex":
+        echo remove_from_table($db, "domainlist", $domains, false, ListType::regex_whitelist);
+        break;
 
-	case "black_regex":
-		echo remove_from_table($db, "domainlist", $domains, false, ListType::regex_blacklist);
-		break;
+    case "black_regex":
+        echo remove_from_table($db, "domainlist", $domains, false, ListType::regex_blacklist);
+        break;
 
-	default:
-		die("Invalid list!");
+    default:
+        die("Invalid list!");
 }
 
 // Reload lists in pihole-FTL after having removed something
 echo shell_exec("sudo pihole restartdns reload");
-?>

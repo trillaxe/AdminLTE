@@ -365,12 +365,10 @@ if ($_POST['action'] == 'get_groups') {
         $type = intval($_POST['type']);
 
         $domain = $_POST['domain'];
-        if($type === ListType::whitelist || $type === ListType::blacklist)
-        {
+        if ($type === ListType::whitelist || $type === ListType::blacklist) {
             // If adding to the exact lists, we convert the domain lower case and check whether it is valid
             $domain = strtolower($domain);
-            if(filter_var($domain, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME) === false)
-            {
+            if (filter_var($domain, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME) === false) {
                 throw new Exception('Domain ' . htmlentities(utf8_encode($domain)) . 'is not a valid domain.');
             }
         }
