@@ -11,6 +11,10 @@ var table;
 var groups = [];
 var token = $("#token").html();
 
+function datetime(date) {
+  return moment.unix(Math.floor(date)).format("Y-MM-DD HH:mm:ss z");
+}
+
 function reload_client_suggestions() {
   $.post(
     "scripts/pi-hole/php/groups.php",
@@ -38,7 +42,7 @@ function reload_client_suggestions() {
       sel.append(
         $("<option />")
           .val("custom")
-          .text("Custom, specified on the right")
+          .text("Custom, specify below...")
       );
     },
     "json"
@@ -80,6 +84,7 @@ function initTable() {
     columns: [
       { data: "id", visible: false },
       { data: "ip" },
+      { data: "comment" },
       { data: "groups", searchable: false },
       { data: "name", width: "80px", orderable: false }
     ],
@@ -87,7 +92,13 @@ function initTable() {
       $(".deleteClient").on("click", deleteClient);
     },
     rowCallback: function(row, data) {
-      var tooltip = "Database ID: " + data.id;
+      var tooltip =
+        "Added: " +
+        datetime(data.date_added) +
+        "\nLast modified: " +
+        datetime(data.date_modified) +
+        "\nDatabase ID: " +
+        data.id;
       var ip_name =
         '<code id="ip" title="' +
         tooltip +
@@ -100,8 +111,16 @@ function initTable() {
         ip_name += '<br><code id="name" title="' + tooltip + '">' + data.name + "</code>";
       $("td:eq(0)", row).html(ip_name);
 
-      $("td:eq(1)", row).empty();
-      $("td:eq(1)", row).append('<select id="multiselect" multiple="multiple"></select>');
+      $("td:eq(1)", row).html(
+        '<input id="comment" class="form-control"><input id="id" type="hidden" value="' +
+          data.id +
+          '">'
+      );
+      $("#comment", row).val(data.comment);
+      $("#comment", row).on("change", editClient);
+
+      $("td:eq(2)", row).empty();
+      $("td:eq(2)", row).append('<select id="multiselect" multiple="multiple"></select>');
       var sel = $("#multiselect", row);
       // Add all known groups
       for (var i = 0; i < groups.length; i++) {
@@ -129,7 +148,7 @@ function initTable() {
         '">' +
         '<span class="glyphicon glyphicon-trash"></span>' +
         "</button>";
-      $("td:eq(2)", row).html(button);
+      $("td:eq(3)", row).html(button);
     },
     dom:
       "<'row'<'col-sm-4'l><'col-sm-8'f>>" +
@@ -223,12 +242,16 @@ function editClient() {
   var groups = tr.find("#multiselect").val();
   var ip = tr.find("#ip").text();
   var name = tr.find("#name").text();
+  var comment = tr.find("#comment").val();
 
   var done = "edited";
   var not_done = "editing";
   if (elem === "multiselect") {
     done = "edited groups of";
     not_done = "editing groups of";
+  } else if (elem === "comment") {
+    done = "edited comment of";
+    not_done = "editing comment of";
   }
 
   var ip_name = ip;
@@ -242,7 +265,13 @@ function editClient() {
     url: "scripts/pi-hole/php/groups.php",
     method: "post",
     dataType: "json",
-    data: { action: "edit_client", id: id, groups: groups, token: token },
+    data: {
+      action: "edit_client",
+      id: id,
+      groups: groups,
+      token: token,
+      comment: comment
+    },
     success: function(response) {
       utils.enableAll();
       if (response.success) {
