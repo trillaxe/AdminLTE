@@ -11,10 +11,6 @@ var table;
 var groups = [];
 var token = $("#token").html();
 
-function datetime(date) {
-  return moment.unix(Math.floor(date)).format("Y-MM-DD HH:mm:ss z");
-}
-
 function reload_client_suggestions() {
   $.post(
     "scripts/pi-hole/php/groups.php",
@@ -94,9 +90,9 @@ function initTable() {
     rowCallback: function(row, data) {
       var tooltip =
         "Added: " +
-        datetime(data.date_added) +
+        utils.datetime(data.date_added) +
         "\nLast modified: " +
-        datetime(data.date_modified) +
+        utils.datetime(data.date_modified) +
         "\nDatabase ID: " +
         data.id;
       var ip_name =
