@@ -339,6 +339,7 @@ function editDomain() {
           "Successfully " + done + " domain",
           domain
         );
+        table.ajax.reload();
       } else
         showAlert(
           "error",
@@ -373,10 +374,7 @@ function deleteDomain() {
     success: function(response) {
       if (response.success) {
         showAlert("success", "glyphicon glyphicon-trash", "Successfully deleted domain", domain);
-        table
-          .row(tr)
-          .remove()
-          .draw(false);
+        table.ajax.reload();
       } else showAlert("error", "", "Error while deleting domain with ID " + id, response.message);
     },
     error: function(jqXHR, exception) {

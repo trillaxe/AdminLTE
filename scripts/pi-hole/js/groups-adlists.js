@@ -315,6 +315,7 @@ function editAdlist() {
           "Successfully " + done + " adlist ",
           address
         );
+        table.ajax.reload();
       } else {
         showAlert(
           "error",
@@ -350,10 +351,7 @@ function deleteAdlist() {
     success: function(response) {
       if (response.success) {
         showAlert("success", "glyphicon glyphicon-trash", "Successfully deleted adlist ", address);
-        table
-          .row(tr)
-          .remove()
-          .draw(false);
+        table.ajax.reload();
       } else showAlert("error", "", "Error while deleting adlist with ID " + id, response.message);
     },
     error: function(jqXHR, exception) {

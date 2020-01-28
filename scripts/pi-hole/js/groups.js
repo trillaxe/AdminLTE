@@ -264,6 +264,7 @@ function editGroup() {
     success: function(response) {
       if (response.success) {
         showAlert("success", "glyphicon glyphicon-pencil", "Successfully " + done + " group", name);
+        table.ajax.reload();
       } else {
         showAlert(
           "error",
@@ -299,10 +300,7 @@ function deleteGroup() {
     success: function(response) {
       if (response.success) {
         showAlert("success", "glyphicon glyphicon-trash", "Successfully deleted group ", name);
-        table
-          .row(tr)
-          .remove()
-          .draw(false);
+        table.ajax.reload();
       } else {
         showAlert("error", "", "Error while deleting group with ID " + id, response.message);
       }

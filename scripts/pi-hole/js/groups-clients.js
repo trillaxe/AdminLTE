@@ -304,6 +304,7 @@ function editClient() {
           "Successfully " + done + " client",
           ip_name
         );
+        table.ajax.reload();
       } else {
         showAlert("error", "Error while " + not_done + " client with ID " + id, response.message);
       }
@@ -340,11 +341,8 @@ function deleteClient() {
     success: function(response) {
       if (response.success) {
         showAlert("success", "glyphicon glyphicon-trash", "Successfully deleted client ", ip_name);
-        table
-          .row(tr)
-          .remove()
-          .draw(false);
         reload_client_suggestions();
+        table.ajax.reload();
       } else {
         showAlert("error", "", "Error while deleting client with ID " + id, response.message);
       }
