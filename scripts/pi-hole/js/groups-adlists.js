@@ -62,14 +62,14 @@ function initTable() {
         "\nDatabase ID: " +
         data.id;
       $("td:eq(0)", row).html(
-        '<code id="address" title="' + tooltip + '">' + data.address + "</code>"
+        '<code class="address" title="' + tooltip + '">' + data.address + "</code>"
       );
 
       var disabled = data.enabled === 0;
       $("td:eq(1)", row).html(
-        '<input type="checkbox" id="status"' + (disabled ? "" : " checked") + ">"
+        '<input type="checkbox" class="status"' + (disabled ? "" : " checked") + ">"
       );
-      var status = $("#status", row);
+      var status = $(".status", row);
       status.bootstrapToggle({
         on: "Enabled",
         off: "Disabled",
@@ -80,11 +80,11 @@ function initTable() {
       status.on("change", editAdlist);
 
       $("td:eq(2)", row).html(
-        '<input id="comment" class="form-control"><input id="id" type="hidden" value="' +
+        '<input class="comment" class="form-control"><input class="id" type="hidden" value="' +
           data.id +
           '">'
       );
-      var comment = $("#comment", row);
+      var comment = $(".comment", row);
       comment.val(data.comment);
       comment.on("change", editAdlist);
 
@@ -92,9 +92,9 @@ function initTable() {
       $("td:eq(3)", row).append(
         '<div id="selectHome' +
           data.id +
-          '"><select id="multiselect" multiple="multiple"></select></div>'
+          '"><select class="multiselect" multiple="multiple"></select></div>'
       );
-      var sel = $("#multiselect", row);
+      var sel = $(".multiselect", row);
       // Add all known groups
       for (var i = 0; i < groups.length; i++) {
         var extra = "";
@@ -245,13 +245,13 @@ function addAdlist() {
 }
 
 function editAdlist() {
-  var elem = $(this).attr("id");
+  var elem = $(this).attr("class");
   var tr = $(this).closest("tr");
-  var id = tr.find("#id").val();
-  var status = tr.find("#status").is(":checked") ? 1 : 0;
-  var comment = tr.find("#comment").val();
-  var groups = tr.find("#multiselect").val();
-  var address = tr.find("#address").text();
+  var id = tr.find(".id").val();
+  var status = tr.find(".status").is(":checked") ? 1 : 0;
+  var comment = tr.find(".comment").val();
+  var groups = tr.find(".multiselect").val();
+  var address = tr.find(".address").text();
 
   var done = "edited";
   var not_done = "editing";
@@ -318,7 +318,7 @@ function editAdlist() {
 function deleteAdlist() {
   var id = $(this).attr("data-id");
   var tr = $(this).closest("tr");
-  var address = tr.find("#address").text();
+  var address = tr.find(".address").text();
 
   utils.disableAll();
   utils.showAlert("info", "", "Deleting adlist...", address);

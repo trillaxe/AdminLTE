@@ -76,7 +76,7 @@ function initTable() {
         "\nDatabase ID: " +
         data.id;
       $("td:eq(0)", row).html(
-        '<code id="domain" title="' + tooltip + '" class="breakall">' + data.domain + "</code>"
+        '<code class="domain" title="' + tooltip + '" class="breakall">' + data.domain + "</code>"
       );
 
       var whitelist_options = "";
@@ -102,33 +102,35 @@ function initTable() {
       }
 
       $("td:eq(1)", row).html(
-        '<select id="type" class="form-control">' +
+        '<select class="type" class="form-control">' +
           whitelist_options +
           blacklist_options +
           "</select>"
       );
-      $("#type", row).on("change", editDomain);
+      $(".type", row).on("change", editDomain);
 
       var disabled = data.enabled === 0;
       $("td:eq(2)", row).html(
-        '<input type="checkbox" id="status"' + (disabled ? "" : " checked") + ">"
+        '<input type="checkbox" class="status"' + (disabled ? "" : " checked") + ">"
       );
-      $("#status", row).bootstrapToggle({
+      var status = $(".status", row);
+      status.bootstrapToggle({
         on: "Enabled",
         off: "Disabled",
         size: "small",
         onstyle: "success",
         width: "80px"
       });
-      $("#status", row).on("change", editDomain);
+      status.on("change", editDomain);
 
       $("td:eq(3)", row).html(
-        '<input id="comment" class="form-control"><input id="id" type="hidden" value="' +
+        '<input class="comment" class="form-control"><input id="id" type="hidden" value="' +
           data.id +
           '">'
       );
-      $("#comment", row).val(data.comment);
-      $("#comment", row).on("change", editDomain);
+      var comment = $(".comment", row);
+      comment.val(data.comment);
+      comment.on("change", editDomain);
 
       // Show group assignment field only if in full domain management mode
       if (table.column(5).visible()) {
@@ -136,9 +138,9 @@ function initTable() {
         $("td:eq(4)", row).append(
           '<div id="selectHome' +
             data.id +
-            '"><select id="multiselect" multiple="multiple"></select></div>'
+            '"><select class="multiselect" multiple="multiple"></select></div>'
         );
-        var sel = $("#multiselect", row);
+        var sel = $(".multiselect", row);
         // Add all known groups
         for (var i = 0; i < groups.length; i++) {
           var extra = "";
@@ -311,14 +313,14 @@ function addDomain() {
 }
 
 function editDomain() {
-  var elem = $(this).attr("id");
+  var elem = $(this).attr("class");
   var tr = $(this).closest("tr");
-  var domain = tr.find("#domain").text();
-  var id = tr.find("#id").val();
-  var type = tr.find("#type").val();
-  var status = tr.find("#status").is(":checked") ? 1 : 0;
-  var comment = tr.find("#comment").val();
-  var groups = tr.find("#multiselect").val();
+  var domain = tr.find(".domain").text();
+  var id = tr.find(".id").val();
+  var type = tr.find(".type").val();
+  var status = tr.find(".status").is(":checked") ? 1 : 0;
+  var comment = tr.find(".comment").val();
+  var groups = tr.find(".multiselect").val();
 
   var done = "edited";
   var not_done = "editing";
@@ -390,7 +392,7 @@ function editDomain() {
 function deleteDomain() {
   var id = $(this).attr("data-id");
   var tr = $(this).closest("tr");
-  var domain = tr.find("#domain").text();
+  var domain = tr.find(".domain").text();
 
   utils.disableAll();
   utils.showAlert("info", "", "Deleting domain...", domain);

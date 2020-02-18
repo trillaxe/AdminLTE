@@ -89,24 +89,24 @@ function initTable() {
     rowCallback: function(row, data) {
       var tooltip = "Database ID: " + data.id;
       var ip_name =
-        '<code id="ip" title="' +
+        '<code class="ip" title="' +
         tooltip +
         '">' +
         data.ip +
-        '</code><input id="id" type="hidden" value="' +
+        '</code><input class="id" type="hidden" value="' +
         data.id +
         '">';
       if (data.name !== null && data.name.length > 0)
-        ip_name += '<br><code id="name" title="' + tooltip + '">' + data.name + "</code>";
+        ip_name += '<br><code class="name" title="' + tooltip + '">' + data.name + "</code>";
       $("td:eq(0)", row).html(ip_name);
 
       $("td:eq(1)", row).empty();
       $("td:eq(1)", row).append(
         '<div id="selectHome' +
           data.id +
-          '"><select id="multiselect" multiple="multiple"></select></div>'
+          '"><select class="multiselect" multiple="multiple"></select></div>'
       );
-      var sel = $("#multiselect", row);
+      var sel = $(".multiselect", row);
       // Add all known groups
       for (var i = 0; i < groups.length; i++) {
         var extra = "";
@@ -249,12 +249,12 @@ function addClient() {
 }
 
 function editClient() {
-  var elem = $(this).attr("id");
+  var elem = $(this).attr("class");
   var tr = $(this).closest("tr");
-  var id = tr.find("#id").val();
-  var groups = tr.find("#multiselect").val();
-  var ip = tr.find("#ip").text();
-  var name = tr.find("#name").text();
+  var id = tr.find(".id").val();
+  var groups = tr.find(".multiselect").val();
+  var ip = tr.find(".ip").text();
+  var name = tr.find(".name").text();
 
   var done = "edited";
   var not_done = "editing";
@@ -308,8 +308,8 @@ function editClient() {
 function deleteClient() {
   var id = $(this).attr("data-id");
   var tr = $(this).closest("tr");
-  var ip = tr.find("#ip").text();
-  var name = tr.find("#name").text();
+  var ip = tr.find(".ip").text();
+  var name = tr.find(".name").text();
 
   var ip_name = ip;
   if (name.length > 0) {

@@ -39,21 +39,21 @@ $(document).ready(function() {
         "\nDatabase ID: " +
         data.id;
       $("td:eq(0)", row).html(
-        '<input id="name" title="' +
+        '<input class="name" title="' +
           tooltip +
-          '" class="form-control"><input id="id" type="hidden" value="' +
+          '" class="form-control"><input class="id" type="hidden" value="' +
           data.id +
           '">'
       );
-      var name = $("#name", row);
+      var name = $(".name", row);
       name.val(data.name);
       name.on("change", editGroup);
 
       var disabled = data.enabled === 0;
       $("td:eq(1)", row).html(
-        '<input type="checkbox" id="status"' + (disabled ? "" : " checked") + ">"
+        '<input type="checkbox" class="status"' + (disabled ? "" : " checked") + ">"
       );
-      var status = $("#status", row);
+      var status = $(".status", row);
       status.bootstrapToggle({
         on: "Enabled",
         off: "Disabled",
@@ -63,10 +63,11 @@ $(document).ready(function() {
       });
       status.on("change", editGroup);
 
-      $("td:eq(2)", row).html('<input id="desc" class="form-control">');
-      var desc = data.description !== null ? data.description : "";
-      $("#desc", row).val(desc);
-      $("#desc", row).on("change", editGroup);
+      $("td:eq(2)", row).html('<input class="desc" class="form-control">');
+      var text = data.description !== null ? data.description : "";
+      var desc = $(".desc", row);
+      desc.val(text);
+      desc.on("change", editGroup);
 
       $("td:eq(3)", row).empty();
       if (data.id !== 0) {
@@ -164,12 +165,12 @@ function addGroup() {
 }
 
 function editGroup() {
-  var elem = $(this).attr("id");
+  var elem = $(this).attr("class");
   var tr = $(this).closest("tr");
-  var id = tr.find("#id").val();
-  var name = tr.find("#name").val();
-  var status = tr.find("#status").is(":checked") ? 1 : 0;
-  var desc = tr.find("#desc").val();
+  var id = tr.find(".id").val();
+  var name = tr.find(".name").val();
+  var status = tr.find(".status").is(":checked") ? 1 : 0;
+  var desc = tr.find(".desc").val();
 
   var done = "edited";
   var not_done = "editing";
@@ -235,7 +236,7 @@ function editGroup() {
 function deleteGroup() {
   var id = $(this).attr("data-id");
   var tr = $(this).closest("tr");
-  var name = tr.find("#name").val();
+  var name = tr.find(".name").val();
 
   utils.disableAll();
   utils.showAlert("info", "", "Deleting group...", name);
