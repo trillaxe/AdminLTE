@@ -10,6 +10,8 @@
 var table;
 var groups = [];
 var token = $("#token").html();
+var GETDict = {};
+var showtype = "all";
 
 function get_groups() {
   $.post(
@@ -24,6 +26,17 @@ function get_groups() {
 }
 
 $(document).ready(function() {
+  window.location.search
+    .substr(1)
+    .split("&")
+    .forEach(function(item) {
+      GETDict[item.split("=")[0]] = item.split("=")[1];
+    });
+
+  if ("type" in GETDict && (GETDict.type === "white" || GETDict.type === "black")) {
+    showtype = GETDict.type;
+  }
+
   $("#btnAdd").on("click", addDomain);
 
   get_groups();
@@ -38,7 +51,7 @@ function initTable() {
   table = $("#domainsTable").DataTable({
     ajax: {
       url: "scripts/pi-hole/php/groups.php",
-      data: { action: "get_domains", token: token },
+      data: { action: "get_domains", showtype: showtype, token: token },
       type: "POST"
     },
     order: [[0, "asc"]],
@@ -63,23 +76,35 @@ function initTable() {
         "\nDatabase ID: " +
         data.id;
       $("td:eq(0)", row).html(
-        '<code id="domain" title="' + tooltip + '">' + data.domain + "</code>"
+        '<code id="domain" title="' + tooltip + '" class="breakall">' + data.domain + "</code>"
       );
 
-      $("td:eq(1)", row).html(
-        '<select id="type" class="form-control">' +
+      var whitelist_options = "";
+      if (showtype === "all" || showtype === "white") {
+        whitelist_options =
           '<option value="0"' +
           (data.type === 0 ? " selected" : "") +
           ">Exact whitelist</option>" +
-          '<option value="1"' +
-          (data.type === 1 ? " selected" : "") +
-          ">Exact blacklist</option>" +
           '<option value="2"' +
           (data.type === 2 ? " selected" : "") +
-          ">Regex whitelist</option>" +
+          ">Regex whitelist</option>";
+      }
+
+      var blacklist_options = "";
+      if (showtype === "all" || showtype === "black") {
+        blacklist_options =
+          '<option value="1"' +
+          (data.type === 1 ? " selected " : " ") +
+          ">Exact blacklist</option>" +
           '<option value="3"' +
           (data.type === 3 ? " selected" : "") +
-          ">Regex blacklist</option>" +
+          ">Regex blacklist</option>";
+      }
+
+      $("td:eq(1)", row).html(
+        '<select id="type" class="form-control">' +
+          whitelist_options +
+          blacklist_options +
           "</select>"
       );
       $("#type", row).on("change", editDomain);
@@ -105,28 +130,70 @@ function initTable() {
       $("#comment", row).val(data.comment);
       $("#comment", row).on("change", editDomain);
 
-      $("td:eq(4)", row).empty();
-      $("td:eq(4)", row).append('<select id="multiselect" multiple="multiple"></select>');
-      var sel = $("#multiselect", row);
-      // Add all known groups
-      for (var i = 0; i < groups.length; i++) {
-        var extra = "";
-        if (!groups[i].enabled) {
-          extra = " (disabled)";
+      // Show group assignment field only if in full domain management mode
+      if (table.column(5).visible()) {
+        $("td:eq(4)", row).empty();
+        $("td:eq(4)", row).append(
+          '<div id="selectHome' +
+            data.id +
+            '"><select id="multiselect" multiple="multiple"></select></div>'
+        );
+        var sel = $("#multiselect", row);
+        // Add all known groups
+        for (var i = 0; i < groups.length; i++) {
+          var extra = "";
+          if (!groups[i].enabled) {
+            extra = " (disabled)";
+          }
+
+          sel.append(
+            $("<option />")
+              .val(groups[i].id)
+              .text(groups[i].name + extra)
+          );
         }
 
-        sel.append(
-          $("<option />")
-            .val(groups[i].id)
-            .text(groups[i].name + extra)
-        );
+        // Select assigned groups
+        sel.val(data.groups);
+        // Initialize multiselect
+        sel.multiselect({
+          includeSelectAllOption: true,
+          buttonContainer: '<div id="container' + data.id + '" class="btn-group"/>',
+          maxHeight: 200,
+          onDropdownShown: function() {
+            var el = $("#container" + data.id);
+            var top = el[0].getBoundingClientRect().top;
+            var bottom = $(window).height() - top - el.height();
+            if (bottom < 200) {
+              el.addClass("dropup");
+            }
+
+            if (bottom > 200) {
+              el.removeClass("dropup");
+            }
+
+            var offset = el.offset();
+            $("body").append(el);
+            el.css("position", "absolute");
+            el.css("top", offset.top + "px");
+            el.css("left", offset.left + "px");
+          },
+          onDropdownHide: function() {
+            var el = $("#container" + data.id);
+            var home = $("#selectHome" + data.id);
+            home.append(el);
+            el.removeAttr("style");
+          }
+        });
+        sel.on("change", editDomain);
       }
 
-      // Select assigned groups
-      sel.val(data.groups);
-      // Initialize multiselect
-      sel.multiselect({ includeSelectAllOption: true });
-      sel.on("change", editDomain);
+      // Highlight row
+      if ("domainid" in GETDict && data.id === parseInt(GETDict.domainid)) {
+        $(row)
+          .find("td")
+          .addClass("highlight");
+      }
 
       var button =
         '<button class="btn btn-danger btn-xs deleteDomain" type="button" data-id="' +
@@ -134,7 +201,11 @@ function initTable() {
         '">' +
         '<span class="glyphicon glyphicon-trash"></span>' +
         "</button>";
-      $("td:eq(5)", row).html(button);
+      if (table.column(5).visible()) {
+        $("td:eq(5)", row).html(button);
+      } else {
+        $("td:eq(4)", row).html(button);
+      }
     },
     dom:
       "<'row'<'col-sm-4'l><'col-sm-8'f>>" +
@@ -164,8 +235,22 @@ function initTable() {
       data.search.search = "";
       // Reset visibility of ID column
       data.columns[0].visible = false;
+      // Show group assignment column only on full page
+      data.columns[5].visible = showtype === "all";
       // Apply loaded state to table
       return data;
+    },
+    initComplete: function() {
+      if ("domainid" in GETDict) {
+        var pos = table
+          .column(0, { order: "current" })
+          .data()
+          .indexOf(parseInt(GETDict.domainid));
+        if (pos >= 0) {
+          var page = Math.floor(pos / table.page.info().length);
+          table.page(page).draw(false);
+        }
+      }
     }
   });
 
